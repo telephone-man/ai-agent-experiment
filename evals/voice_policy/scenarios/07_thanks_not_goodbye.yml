@@ -1,0 +1,21 @@
+id: thanks_not_goodbye
+description: User says thanks and continues with another invoice question.
+input:
+  transcript: "Thanks, can you also tell me when invoice INV1042 is due?"
+  is_partial: false
+  stt_confidence: 0.95
+  current_flow: "account_support"
+  last_agent_message: "That invoice was issued yesterday."
+  agent_is_speaking: false
+  tts_allow_interruptions: true
+  pending_action: null
+  pending_action_risk: "none"
+expected_semantic:
+  intent: "ask_invoice"
+  goodbye_detected: true
+  continue_conversation: true
+expected_policy:
+  decision: "RESPOND"
+  safe_to_execute_tools: false
+  forbidden_decisions:
+    - "END_CALL"

@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="call.css" />
+    <title>Assistant call</title>
+  </head>
+  <body id="body">
+    <script src="../assets/sip-0.21.2.min.js"></script>
+    <div class="container">
+      <header id="page-header" class="page-header">
+        <button id="page-back-button" class="back-button" type="button">Back</button>
+        <div>
+          <h1>Assistant call</h1>
+          <p>Start a SIP/WebRTC call to the voice agent.</p>
+        </div>
+      </header>
+      <audio autoplay id="incomingAudio"></audio>
+      <section id="call-launch" class="call-launch" aria-label="Call launcher">
+        <div class="call-launch-actions">
+          <button id="start-call-button" class="call-launch-button" type="button">
+            Call AI agent
+          </button>
+        </div>
+      </section>
+      <div id="call-content" class="call-content hidden">
+        <div id="call-details" class="call-detail-content">
+          <div id="call-duration" class="call-timer">00:00</div>
+          <div id="avatar" class="avatar"></div>
+          <div id="contact-name" class="contact-name"></div>
+          <div id="contact-number" class="contact-number"></div>
+          <div id="info-message" class="info-message">Info</div>
+        </div>
+
+        <div id="keypad" class="dialled-number-display">
+          <span id="dialled-number" class="contact-number"></span>
+          <div id="keypad-info" class="keypad">
+            <button class="keyButton" onclick="keyPressed('1')">1</button>
+            <button class="keyButton" onclick="keyPressed('2')">2</button>
+            <button class="keyButton" onclick="keyPressed('3')">3</button>
+            <button class="keyButton" onclick="keyPressed('4')">4</button>
+            <button class="keyButton" onclick="keyPressed('5')">5</button>
+            <button class="keyButton" onclick="keyPressed('6')">6</button>
+            <button class="keyButton" onclick="keyPressed('7')">7</button>
+            <button class="keyButton" onclick="keyPressed('8')">8</button>
+            <button class="keyButton" onclick="keyPressed('9')">9</button>
+            <button class="keyButton" onclick="keyPressed('*')">*</button>
+            <button
+              class="keyButton"
+              style="display: block"
+              onclick="keyPressed('0')"
+              ontouchstart="onTouchStart('0')"
+              ontouchend="onTouchEnd('0')"
+            >
+              <div style="margin-bottom: -5px">0</div>
+              <div style="margin-top: -5px; font-size: 15px">+</div>
+            </button>
+            <button class="keyButton" onclick="keyPressed('#')">#</button>
+          </div>
+        </div>
+
+        <div id="incoming-call-buttons" class="call-actions">
+          <button id="accept-call-button" class="action-button accept-button">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"
+              />
+            </svg>
+            <span id="accept-call">Accept</span>
+          </button>
+
+          <button id="decline-call-button" class="action-button decline-button">
+            <svg class="button-icon" viewBox="0 -960 960 960" fill="#fff">
+              <path
+                d="M480-640q126 0 241 50.5T918-443q8 10 8.5 22t-8.5 21l-94 94q-8 8-23 9t-24-6l-114-85q-6-5-9-11t-3-13v-139q-42-16-85.5-22.5T480-580q-42 0-85.5 6.5T309-551v139q0 7-3 13t-9 11l-114 85q-12 9-24.5 8T136-306l-94-94q-9-9-8.5-21t8.5-22q82-96 197-146.5T480-640Z"
+              />
+            </svg>
+            <span id="decline-call">Decline</span>
+          </button>
+        </div>
+
+        <div id="in-call-buttons" class="call-actions">
+          <button id="mute-button" class="action-button mute-button disabled">
+            <svg
+              id="mute-icon"
+              class="button-icon hidden"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
+              />
+            </svg>
+            <svg
+              id="unmute-icon"
+              class="button-icon"
+              viewBox="0 0 640 640"
+              fill="currentColor"
+            >
+              <path
+                d="M73 39.1C63.6 29.7 48.4 29.7 39.1 39.1C29.8 48.5 29.7 63.7 39 73.1L567 601.1C576.4 610.5 591.6 610.5 600.9 601.1C610.2 591.7 610.3 576.5 600.9 567.2L456.7 422.8C490.9 388.2 512 340.6 512 288L512 248C512 234.7 501.3 224 488 224C474.7 224 464 234.7 464 248L464 288C464 327.3 448.3 362.9 422.7 388.9L388.8 355C405.6 337.7 416 314 416 288L416 160C416 107 373 64 320 64C267 64 224 107 224 160L224 190.2L73 39.2zM371.3 473.1L329.9 431.7C326.6 431.9 323.4 432 320.1 432C240.6 432 176.1 367.5 176.1 288L176.1 277.8L132.5 234.2C129.7 238.1 128.1 242.9 128.1 248L128.1 288C128.1 385.9 201.4 466.7 296.1 478.5L296.1 528L248.1 528C234.8 528 224.1 538.7 224.1 552C224.1 565.3 234.8 576 248.1 576L392.1 576C405.4 576 416.1 565.3 416.1 552C416.1 538.7 405.4 528 392.1 528L344.1 528L344.1 478.5C353.4 477.3 362.5 475.5 371.4 473.1z"
+              />
+            </svg>
+          </button>
+
+          <button id="hang-up-button" class="action-button decline-button">
+            <svg
+              id="call-hangup-icon"
+              class="button-icon"
+              viewBox="0 -960 960 960"
+              fill="#fff"
+            >
+              <path
+                d="M480-640q126 0 241 50.5T918-443q8 10 8.5 22t-8.5 21l-94 94q-8 8-23 9t-24-6l-114-85q-6-5-9-11t-3-13v-139q-42-16-85.5-22.5T480-580q-42 0-85.5 6.5T309-551v139q0 7-3 13t-9 11l-114 85q-12 9-24.5 8T136-306l-94-94q-9-9-8.5-21t8.5-22q82-96 197-146.5T480-640Z"
+              />
+            </svg>
+            <svg
+              id="call-place-icon"
+              class="button-icon"
+              viewBox="0 0 640 640"
+              fill="#fff"
+            >
+              <path
+                d="M376 32C504.1 32 608 135.9 608 264C608 277.3 597.3 288 584 288C570.7 288 560 277.3 560 264C560 162.4 477.6 80 376 80C362.7 80 352 69.3 352 56C352 42.7 362.7 32 376 32zM384 224C401.7 224 416 238.3 416 256C416 273.7 401.7 288 384 288C366.3 288 352 273.7 352 256C352 238.3 366.3 224 384 224zM352 152C352 138.7 362.7 128 376 128C451.1 128 512 188.9 512 264C512 277.3 501.3 288 488 288C474.7 288 464 277.3 464 264C464 215.4 424.6 176 376 176C362.7 176 352 165.3 352 152zM176.1 65.4C195.8 60 216.4 70.1 224.2 88.9L264.7 186.2C271.6 202.7 266.8 221.8 252.9 233.2L208.8 269.3C241.3 340.9 297.8 399.3 368.1 434.2L406.7 387C418 373.1 437.1 368.4 453.7 375.2L551 415.8C569.8 423.6 579.9 444.2 574.5 463.9L573 469.4C555.4 534.1 492.9 589.3 416.6 573.2C241.6 536.1 103.9 398.4 66.8 223.4C50.7 147.1 105.9 84.6 170.5 66.9L176 65.4z"
+              />
+            </svg>
+          </button>
+
+          <button
+            id="delete-button"
+            onclick="deletePressed()"
+            class="action-button delete-button"
+          >
+            <svg class="button-icon" viewBox="0 0 640 512" fill="#fff">
+              <path
+                d="M576 64H205.26A63.97 63.97 0 0 0 160 82.75L9.37 233.37c-12.5 12.5-12.5 32.76 0 45.25L160 429.25c12 12 28.28 18.75 45.25 18.75H576c35.35 0 64-28.65 64-64V128c0-35.35-28.65-64-64-64zm-84.69 254.06c6.25 6.25 6.25 16.38 0 22.63l-22.62 22.62c-6.25 6.25-16.38 6.25-22.63 0L384 301.25l-62.06 62.06c-6.25 6.25-16.38 6.25-22.63 0l-22.62-22.62c-6.25-6.25-6.25-16.38 0-22.63L338.75 256l-62.06-62.06c-6.25-6.25-6.25-16.38 0-22.63l22.62-22.62c6.25-6.25 16.38-6.25 22.63 0L384 210.75l62.06-62.06c6.25-6.25 16.38-6.25 22.63 0l22.62 22.62c6.25 6.25 6.25 16.38 0 22.63L429.25 256l62.06 62.06z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <section id="voice-observability" class="voice-observability">
+        <div class="voice-observability-header">
+          <div>
+            <h2>Voice session</h2>
+            <div id="voice-session-label" class="voice-session-label">
+              Waiting for events
+            </div>
+          </div>
+          <div class="voice-observability-actions">
+            <button
+              id="voice-events-toggle-expanded"
+              class="voice-tool-button"
+              type="button"
+            >
+              Expand all
+            </button>
+            <button id="voice-events-copy-debug" class="voice-tool-button" type="button">
+              Copy debug
+            </button>
+          </div>
+        </div>
+
+        <div class="voice-state-panel" aria-live="polite">
+          <div class="voice-panel-title">Persistent state</div>
+          <div class="voice-status-grid">
+            <div class="voice-status-chip" data-status="call">
+              <span>Call</span>
+              <strong id="voice-status-call">idle</strong>
+            </div>
+            <div class="voice-status-chip" data-status="media">
+              <span>Media</span>
+              <strong id="voice-status-media">idle</strong>
+            </div>
+            <div class="voice-status-chip" data-status="user">
+              <span>User Speaking</span>
+              <strong id="voice-status-user">no</strong>
+            </div>
+            <div class="voice-status-chip" data-status="agent">
+              <span>Agent Speaking</span>
+              <strong id="voice-status-agent">no</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-quality-panel" aria-live="polite">
+          <div class="voice-panel-title">Audio quality</div>
+          <div class="voice-quality-grid">
+            <div class="voice-quality-card" data-quality="score">
+              <span>Signal</span>
+              <strong id="voice-quality-score">collecting</strong>
+            </div>
+            <div class="voice-quality-card">
+              <span>Jitter</span>
+              <strong id="voice-quality-jitter">n/a</strong>
+            </div>
+            <div class="voice-quality-card">
+              <span>Loss</span>
+              <strong id="voice-quality-loss">n/a</strong>
+            </div>
+            <div class="voice-quality-card">
+              <span>RTT</span>
+              <strong id="voice-quality-rtt">n/a</strong>
+            </div>
+          </div>
+          <div id="voice-quality-note" class="voice-quality-note">
+            Waiting for WebRTC stats.
+          </div>
+        </div>
+
+        <div
+          id="voice-flow-panel"
+          class="voice-flow-panel"
+          aria-live="polite"
+          data-active-step=""
+        >
+          <div class="voice-panel-title">Turn flow</div>
+          <div id="voice-flow-grid" class="voice-flow-grid" role="list">
+            <div class="voice-flow-step" data-flow-step="caller" role="listitem">
+              <span>1</span>
+              <strong>User speech</strong>
+              <p class="voice-flow-step-help">Detects when the caller speaks.</p>
+              <small id="voice-flow-caller">Waiting</small>
+              <div class="voice-flow-events">
+                <div class="voice-flow-event" data-flow-event="user.speech_started">
+                  <div class="voice-flow-event-copy">
+                    <b>Started</b>
+                    <small>User has started speaking.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="user.speech_stopped">
+                  <div class="voice-flow-event-copy">
+                    <b>Stopped</b>
+                    <small>User stopped speaking for now.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+              </div>
+            </div>
+            <div class="voice-flow-step" data-flow-step="stt" role="listitem">
+              <span>2</span>
+              <strong>STT</strong>
+              <p class="voice-flow-step-help">
+                Turns speech into text from the STT/gateway speech marker.
+              </p>
+              <small id="voice-flow-stt">Waiting</small>
+              <div class="voice-flow-events">
+                <div class="voice-flow-event" data-flow-event="stt.speech_started">
+                  <div class="voice-flow-event-copy">
+                    <b>Speech start</b>
+                    <small>STT provider detected speech start.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="stt.activity_started">
+                  <div class="voice-flow-event-copy">
+                    <b>Inferred start</b>
+                    <small>Gateway inferred start from first STT activity.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="stt.partial">
+                  <div class="voice-flow-event-copy">
+                    <b>Partial</b>
+                    <small>Interim transcript is arriving.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="stt.final">
+                  <div class="voice-flow-event-copy">
+                    <b>Final</b>
+                    <small>Final transcript is ready.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="stt.endpoint">
+                  <div class="voice-flow-event-copy">
+                    <b>Endpoint</b>
+                    <small>Speech endpoint was detected.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+              </div>
+            </div>
+            <div class="voice-flow-step" data-flow-step="policy" role="listitem">
+              <span>3</span>
+              <strong>Policy</strong>
+              <p class="voice-flow-step-help">
+                Evaluates transcript and picks the next action.
+              </p>
+              <small id="voice-flow-policy">Waiting</small>
+              <div class="voice-flow-events">
+                <div class="voice-flow-event" data-flow-event="policy.evaluation_started">
+                  <div class="voice-flow-event-copy">
+                    <b>Started</b>
+                    <small>Policy evaluation began.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="policy.evaluation_finished">
+                  <div class="voice-flow-event-copy">
+                    <b>Finished</b>
+                    <small>Policy evaluation completed.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="policy.semantic_frame">
+                  <div class="voice-flow-event-copy">
+                    <b>Semantic</b>
+                    <small>Meaning was extracted from speech.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="policy.decision">
+                  <div class="voice-flow-event-copy">
+                    <b>Decision</b>
+                    <small>Policy selected the next action.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="turn.started">
+                  <div class="voice-flow-event-copy">
+                    <b>Submitted</b>
+                    <small>Policy handed the turn to response generation.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="user.barge_in_detected">
+                  <div class="voice-flow-event-copy">
+                    <b>Barge-in</b>
+                    <small>User interrupted assistant speech.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+              </div>
+            </div>
+            <div class="voice-flow-step" data-flow-step="llm" role="listitem">
+              <span>4</span>
+              <strong>LLM</strong>
+              <p class="voice-flow-step-help">Generates the assistant response.</p>
+              <small id="voice-flow-llm">Waiting</small>
+              <div class="voice-flow-events">
+                <div class="voice-flow-event" data-flow-event="llm.request_started">
+                  <div class="voice-flow-event-copy">
+                    <b>Request</b>
+                    <small>LLM response was requested.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="llm.partial_text">
+                  <div class="voice-flow-event-copy">
+                    <b>First text</b>
+                    <small>First assistant text arrived.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="llm.upstream_finished">
+                  <div class="voice-flow-event-copy">
+                    <b>Provider done</b>
+                    <small>Model/provider response stream finished.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="llm.request_finished">
+                  <div class="voice-flow-event-copy">
+                    <b>Gateway done</b>
+                    <small>Gateway finished the LLM turn.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="llm.final_text">
+                  <div class="voice-flow-event-copy">
+                    <b>Final text</b>
+                    <small>Final assistant text was published.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+              </div>
+            </div>
+            <div class="voice-flow-step" data-flow-step="tts" role="listitem">
+              <span>5</span>
+              <strong>TTS and playback</strong>
+              <p class="voice-flow-step-help">Converts text and plays audio.</p>
+              <small id="voice-flow-tts">Waiting</small>
+              <div class="voice-flow-events">
+                <div class="voice-flow-event" data-flow-event="tts.started">
+                  <div class="voice-flow-event-copy">
+                    <b>Request</b>
+                    <small>Speech synthesis was requested.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="tts.enqueue_started">
+                  <div class="voice-flow-event-copy">
+                    <b>Queueing</b>
+                    <small>Audio is entering the queue.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="tts.enqueued">
+                  <div class="voice-flow-event-copy">
+                    <b>Queued</b>
+                    <small>Audio is ready to play.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="agent.speaking_started">
+                  <div class="voice-flow-event-copy">
+                    <b>Audio</b>
+                    <small>Assistant audio started playing.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="tts.cancel_requested">
+                  <div class="voice-flow-event-copy">
+                    <b>Stop requested</b>
+                    <small>Gateway decided playback should stop.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="tts.break_sent">
+                  <div class="voice-flow-event-copy">
+                    <b>Break command</b>
+                    <small>Stop command was sent to FreeSWITCH.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="tts.finished">
+                  <div class="voice-flow-event-copy">
+                    <b>Finished</b>
+                    <small>Speech playback completed normally.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+                <div class="voice-flow-event" data-flow-event="tts.cancelled">
+                  <div class="voice-flow-event-copy">
+                    <b>Cancelled</b>
+                    <small>Queued or playing audio stopped.</small>
+                  </div>
+                  <time>--</time>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-observability-grid">
+          <div class="voice-transcript-panel">
+            <div class="voice-panel-title">Transcript</div>
+            <div id="voice-transcript-history" class="voice-transcript-history">
+              <div class="voice-empty-state">No transcript yet.</div>
+            </div>
+            <div id="voice-partial-transcript" class="voice-partial-transcript">
+              No partial transcript.
+            </div>
+          </div>
+
+          <div class="voice-metrics-panel">
+            <div class="voice-panel-title">Turn Timing</div>
+            <p class="voice-metrics-note">
+              Values reset when this panel is cleared. First and average are across observed
+              turns; latest is the most recent turn. Audio-start and playback rows are estimates.
+            </p>
+            <div class="voice-metrics-scroll">
+              <table class="voice-metrics" aria-label="Voice turn timing metrics">
+                <thead>
+                  <tr>
+                    <th scope="col">Stage</th>
+                    <th scope="col">First</th>
+                    <th scope="col">Latest</th>
+                    <th scope="col">Avg</th>
+                    <th scope="col">Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">
+                      <span>Speech to partial</span>
+                      <small>Measured: inferred speech start to first partial STT transcript.</small>
+                    </th>
+                    <td id="voice-metric-speech-partial-first">n/a</td>
+                    <td id="voice-metric-speech-partial">n/a</td>
+                    <td id="voice-metric-speech-partial-average">n/a</td>
+                    <td id="voice-metric-speech-partial-count">0</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      <span>Final to LLM req</span>
+                      <small>Measured: final transcript to LLM request start.</small>
+                    </th>
+                    <td id="voice-metric-final-llm-first">n/a</td>
+                    <td id="voice-metric-final-llm">n/a</td>
+                    <td id="voice-metric-final-llm-average">n/a</td>
+                    <td id="voice-metric-final-llm-count">0</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      <span>LLM response</span>
+                      <small>Measured: LLM request start to completed response text.</small>
+                    </th>
+                    <td id="voice-metric-llm-tts-first">n/a</td>
+                    <td id="voice-metric-llm-tts">n/a</td>
+                    <td id="voice-metric-llm-tts-average">n/a</td>
+                    <td id="voice-metric-llm-tts-count">0</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      <span>TTS enqueue</span>
+                      <small>Measured: TTS request to FreeSWITCH queue acceptance.</small>
+                    </th>
+                    <td id="voice-metric-tts-duration-first">n/a</td>
+                    <td id="voice-metric-tts-duration">n/a</td>
+                    <td id="voice-metric-tts-duration-average">n/a</td>
+                    <td id="voice-metric-tts-duration-count">0</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      <span>Est. playback</span>
+                      <small>Estimated: response text length converted to speech duration.</small>
+                    </th>
+                    <td id="voice-metric-tts-playback-first">n/a</td>
+                    <td id="voice-metric-tts-playback">n/a</td>
+                    <td id="voice-metric-tts-playback-average">n/a</td>
+                    <td id="voice-metric-tts-playback-count">0</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      <span>Final to audio</span>
+                      <small>Estimated: final transcript to expected audible assistant audio.</small>
+                    </th>
+                    <td id="voice-metric-final-agent-first">n/a</td>
+                    <td id="voice-metric-final-agent">n/a</td>
+                    <td id="voice-metric-final-agent-average">n/a</td>
+                    <td id="voice-metric-final-agent-count">0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-timeline-panel">
+          <div class="voice-panel-title">Event timeline</div>
+          <div class="voice-event-header" aria-hidden="true">
+            <span>Time</span>
+            <span>Source</span>
+            <span>Event</span>
+            <span>Detail</span>
+          </div>
+          <div id="voice-event-timeline" class="voice-event-timeline">
+            <div class="voice-empty-state">No events yet.</div>
+          </div>
+        </div>
+      </section>
+
+      <div id="media-debug-root" class="media-debug-root" aria-live="polite">
+        <div class="media-debug-actions">
+          <button
+            id="media-debug-toggle"
+            class="media-debug-button"
+            type="button"
+          >
+            Pause media debug
+          </button>
+          <button
+            id="media-debug-copy"
+            class="media-debug-button secondary"
+            type="button"
+            disabled
+            hidden
+          >
+            Copy report
+          </button>
+        </div>
+        <details id="media-debug-panel" class="media-debug-panel hidden">
+          <summary>WebRTC media debug</summary>
+          <div class="media-debug-body">
+            <pre id="media-debug-output" class="media-debug-output"></pre>
+          </div>
+        </details>
+      </div>
+    </div>
+    <script type="text/javascript" src="call.js"></script>
+    <script>
+      /*
+       * Media Debug Probe
+       * This block is intentionally self-contained so it can be copied into
+       * a mobile WebView app that uses SIP.js and exposes `window.simpleUser`.
+       */
+      (function () {
+        const POLL_INTERVAL_MS = 1000;
+        const MAX_LOG_LINES = 40;
+        const toggleButton = document.getElementById("media-debug-toggle");
+        const copyButton = document.getElementById("media-debug-copy");
+        const panel = document.getElementById("media-debug-panel");
+        const output = document.getElementById("media-debug-output");
+        const setupDebugToggle = document.getElementById("enable-media-debug");
+        const setupForm = document.getElementById("call-setup-form");
+        const mediaDebugQueryParams = new URLSearchParams(window.location.search);
+        const getMediaDebugQueryFlag = (name) => {
+          const value = (mediaDebugQueryParams.get(name) || "").trim().toLowerCase();
+          return value === "1" || value === "true" || value === "yes" || value === "on";
+        };
+        const isMediaDebugEnabledByDefault = () => {
+          if (mediaDebugQueryParams.has("enable_media_debug")) {
+            return getMediaDebugQueryFlag("enable_media_debug");
+          }
+          return true;
+        };
+
+        if (!toggleButton || !copyButton || !panel || !output) {
+          return;
+        }
+
+        const state = {
+          running: false,
+          timer: null,
+          lastSample: null,
+          latestReport: "",
+          logs: [],
+          noPeerConnectionLogged: false,
+        };
+
+        const fmtNumber = (value, digits) => {
+          if (value === undefined || value === null || Number.isNaN(value)) {
+            return "n/a";
+          }
+          return Number(value).toFixed(digits);
+        };
+
+        const toMs = (secondsValue) => {
+          if (secondsValue === undefined || secondsValue === null) {
+            return undefined;
+          }
+          return Number(secondsValue) * 1000;
+        };
+
+        const stamp = () => new Date().toISOString();
+
+        const pushLog = (message) => {
+          state.logs.push(stamp() + " " + message);
+          if (state.logs.length > MAX_LOG_LINES) {
+            state.logs = state.logs.slice(state.logs.length - MAX_LOG_LINES);
+          }
+        };
+
+        const readPath = (obj, path) => {
+          let current = obj;
+          for (let i = 0; i < path.length; i += 1) {
+            if (!current || typeof current !== "object") {
+              return undefined;
+            }
+            current = current[path[i]];
+          }
+          return current;
+        };
+
+        const findPeerConnectionByScan = (root, maxDepth) => {
+          if (!root || typeof root !== "object") {
+            return null;
+          }
+          const queue = [{ value: root, depth: 0 }];
+          const seen = new Set();
+          while (queue.length > 0) {
+            const item = queue.shift();
+            const value = item.value;
+            if (!value || typeof value !== "object") {
+              continue;
+            }
+            if (seen.has(value)) {
+              continue;
+            }
+            seen.add(value);
+            if (
+              value.peerConnection &&
+              typeof value.peerConnection.getStats === "function"
+            ) {
+              return value.peerConnection;
+            }
+            if (typeof value.getStats === "function" && value.connectionState) {
+              return value;
+            }
+            if (item.depth >= maxDepth) {
+              continue;
+            }
+            const keys = Object.keys(value);
+            for (let i = 0; i < keys.length; i += 1) {
+              const child = value[keys[i]];
+              if (child && typeof child === "object") {
+                queue.push({ value: child, depth: item.depth + 1 });
+              }
+            }
+          }
+          return null;
+        };
+
+        const findPeerConnection = () => {
+          const su = window.simpleUser;
+          if (!su) {
+            return null;
+          }
+          const directPaths = [
+            ["session", "sessionDescriptionHandler", "peerConnection"],
+            ["_session", "sessionDescriptionHandler", "peerConnection"],
+            ["sessionDescriptionHandler", "peerConnection"],
+            ["_sessionDescriptionHandler", "peerConnection"],
+          ];
+          for (let i = 0; i < directPaths.length; i += 1) {
+            const candidate = readPath(su, directPaths[i]);
+            if (candidate && typeof candidate.getStats === "function") {
+              return candidate;
+            }
+          }
+          return findPeerConnectionByScan(su, 3);
+        };
+
+        const pickLatestStat = (stats, typeName, kindName) => {
+          let selected = null;
+          stats.forEach((entry) => {
+            if (entry.type !== typeName) {
+              return;
+            }
+            const kind = entry.kind || entry.mediaType;
+            if (kindName && kind && kind !== kindName) {
+              return;
+            }
+            if (!selected || entry.timestamp > selected.timestamp) {
+              selected = entry;
+            }
+          });
+          return selected;
+        };
+
+        const findSelectedCandidatePair = (stats) => {
+          let selected = null;
+          stats.forEach((entry) => {
+            if (entry.type === "candidate-pair" && entry.selected) {
+              selected = entry;
+            }
+          });
+          if (selected) {
+            return selected;
+          }
+          let transportPairId;
+          stats.forEach((entry) => {
+            if (entry.type === "transport" && entry.selectedCandidatePairId) {
+              transportPairId = entry.selectedCandidatePairId;
+            }
+          });
+          if (transportPairId) {
+            return stats.get(transportPairId) || null;
+          }
+          stats.forEach((entry) => {
+            if (
+              !selected &&
+              entry.type === "candidate-pair" &&
+              entry.state === "succeeded" &&
+              entry.nominated
+            ) {
+              selected = entry;
+            }
+          });
+          return selected;
+        };
+
+        const summariseStats = (peerConnection, stats) => {
+          const inbound = pickLatestStat(stats, "inbound-rtp", "audio");
+          const outbound = pickLatestStat(stats, "outbound-rtp", "audio");
+          const remoteInbound = pickLatestStat(
+            stats,
+            "remote-inbound-rtp",
+            "audio",
+          );
+          const candidatePair = findSelectedCandidatePair(stats);
+          const localCandidate = candidatePair
+            ? stats.get(candidatePair.localCandidateId)
+            : null;
+          const remoteCandidate = candidatePair
+            ? stats.get(candidatePair.remoteCandidateId)
+            : null;
+
+          return {
+            sampledAt: stamp(),
+            timestampMs:
+              (inbound && inbound.timestamp) ||
+              (outbound && outbound.timestamp) ||
+              Date.now(),
+            connectionState: peerConnection.connectionState || "unknown",
+            iceConnectionState: peerConnection.iceConnectionState || "unknown",
+            signalingState: peerConnection.signalingState || "unknown",
+            inbound: inbound
+              ? {
+                  packetsReceived: inbound.packetsReceived,
+                  packetsLost: inbound.packetsLost,
+                  bytesReceived: inbound.bytesReceived,
+                  jitterMs: toMs(inbound.jitter),
+                  audioLevel: inbound.audioLevel,
+                  totalAudioEnergy: inbound.totalAudioEnergy,
+                }
+              : null,
+            outbound: outbound
+              ? {
+                  packetsSent: outbound.packetsSent,
+                  bytesSent: outbound.bytesSent,
+                  retransmittedPacketsSent: outbound.retransmittedPacketsSent,
+                  targetBitrate: outbound.targetBitrate,
+                }
+              : null,
+            remoteInbound: remoteInbound
+              ? {
+                  roundTripTimeMs: toMs(remoteInbound.roundTripTime),
+                  fractionLost: remoteInbound.fractionLost,
+                  packetsLost: remoteInbound.packetsLost,
+                }
+              : null,
+            candidatePair: candidatePair
+              ? {
+                  state: candidatePair.state,
+                  currentRoundTripTimeMs: toMs(
+                    candidatePair.currentRoundTripTime,
+                  ),
+                  availableOutgoingBitrate:
+                    candidatePair.availableOutgoingBitrate,
+                  bytesSent: candidatePair.bytesSent,
+                  bytesReceived: candidatePair.bytesReceived,
+                  localCandidate: localCandidate
+                    ? {
+                        type: localCandidate.candidateType,
+                        address: localCandidate.address || localCandidate.ip,
+                        port: localCandidate.port,
+                        protocol: localCandidate.protocol,
+                        networkType: localCandidate.networkType,
+                      }
+                    : null,
+                  remoteCandidate: remoteCandidate
+                    ? {
+                        type: remoteCandidate.candidateType,
+                        address: remoteCandidate.address || remoteCandidate.ip,
+                        port: remoteCandidate.port,
+                        protocol: remoteCandidate.protocol,
+                      }
+                    : null,
+                }
+              : null,
+          };
+        };
+
+        const deriveDelta = (current, previous) => {
+          if (!previous) {
+            return null;
+          }
+          const dtMs =
+            Number(current.timestampMs) - Number(previous.timestampMs);
+          if (!Number.isFinite(dtMs) || dtMs <= 0) {
+            return null;
+          }
+          const dtSec = dtMs / 1000;
+
+          const calcRate = (nowValue, prevValue) => {
+            if (nowValue === undefined || prevValue === undefined) {
+              return undefined;
+            }
+            const delta = Number(nowValue) - Number(prevValue);
+            if (!Number.isFinite(delta)) {
+              return undefined;
+            }
+            return delta / dtSec;
+          };
+
+          const bytesToKbps = (bytesPerSec) => {
+            if (bytesPerSec === undefined) {
+              return undefined;
+            }
+            return (bytesPerSec * 8) / 1000;
+          };
+
+          return {
+            dtSec: dtSec,
+            inboundPacketsPerSec:
+              current.inbound && previous.inbound
+                ? calcRate(
+                    current.inbound.packetsReceived,
+                    previous.inbound.packetsReceived,
+                  )
+                : undefined,
+            outboundPacketsPerSec:
+              current.outbound && previous.outbound
+                ? calcRate(
+                    current.outbound.packetsSent,
+                    previous.outbound.packetsSent,
+                  )
+                : undefined,
+            inboundKbps:
+              current.inbound && previous.inbound
+                ? bytesToKbps(
+                    calcRate(
+                      current.inbound.bytesReceived,
+                      previous.inbound.bytesReceived,
+                    ),
+                  )
+                : undefined,
+            outboundKbps:
+              current.outbound && previous.outbound
+                ? bytesToKbps(
+                    calcRate(
+                      current.outbound.bytesSent,
+                      previous.outbound.bytesSent,
+                    ),
+                  )
+                : undefined,
+          };
+        };
+
+        const buildWarnings = (snapshot) => {
+          const warnings = [];
+          if (snapshot.inbound) {
+            const received = Number(snapshot.inbound.packetsReceived || 0);
+            const lost = Number(snapshot.inbound.packetsLost || 0);
+            const total = received + lost;
+            if (total > 0) {
+              const lossPct = (lost / total) * 100;
+              if (lossPct >= 3) {
+                warnings.push("packet loss " + fmtNumber(lossPct, 2) + "%");
+              }
+            }
+            if (
+              snapshot.inbound.jitterMs !== undefined &&
+              snapshot.inbound.jitterMs >= 30
+            ) {
+              warnings.push(
+                "high jitter " +
+                  fmtNumber(snapshot.inbound.jitterMs, 1) +
+                  " ms",
+              );
+            }
+          }
+          if (
+            snapshot.remoteInbound &&
+            snapshot.remoteInbound.roundTripTimeMs !== undefined &&
+            snapshot.remoteInbound.roundTripTimeMs >= 400
+          ) {
+            warnings.push(
+              "high RTT " +
+                fmtNumber(snapshot.remoteInbound.roundTripTimeMs, 1) +
+                " ms",
+            );
+          }
+          if (
+            snapshot.connectionState &&
+            snapshot.connectionState !== "connected"
+          ) {
+            warnings.push("pc_state=" + snapshot.connectionState);
+          }
+          if (
+            snapshot.iceConnectionState &&
+            snapshot.iceConnectionState !== "connected" &&
+            snapshot.iceConnectionState !== "completed"
+          ) {
+            warnings.push("ice_state=" + snapshot.iceConnectionState);
+          }
+          return warnings;
+        };
+
+        const renderReport = (snapshot, delta, warnings) => {
+          const lines = [];
+          lines.push("Media Debug Probe");
+          lines.push("sampled_at: " + snapshot.sampledAt);
+          lines.push(
+            "states: pc=" +
+              snapshot.connectionState +
+              " ice=" +
+              snapshot.iceConnectionState +
+              " signaling=" +
+              snapshot.signalingState,
+          );
+
+          if (snapshot.inbound) {
+            lines.push(
+              "inbound: packets=" +
+                snapshot.inbound.packetsReceived +
+                " lost=" +
+                snapshot.inbound.packetsLost +
+                " jitter_ms=" +
+                fmtNumber(snapshot.inbound.jitterMs, 1),
+            );
+          } else {
+            lines.push("inbound: n/a");
+          }
+
+          if (snapshot.outbound) {
+            lines.push(
+              "outbound: packets=" +
+                snapshot.outbound.packetsSent +
+                " retransmitted=" +
+                snapshot.outbound.retransmittedPacketsSent,
+            );
+          } else {
+            lines.push("outbound: n/a");
+          }
+
+          if (snapshot.remoteInbound) {
+            lines.push(
+              "remote_inbound: rtt_ms=" +
+                fmtNumber(snapshot.remoteInbound.roundTripTimeMs, 1) +
+                " fraction_lost=" +
+                fmtNumber(snapshot.remoteInbound.fractionLost, 3),
+            );
+          }
+
+          if (delta) {
+            lines.push(
+              "rates: in_pps=" +
+                fmtNumber(delta.inboundPacketsPerSec, 1) +
+                " out_pps=" +
+                fmtNumber(delta.outboundPacketsPerSec, 1) +
+                " in_kbps=" +
+                fmtNumber(delta.inboundKbps, 1) +
+                " out_kbps=" +
+                fmtNumber(delta.outboundKbps, 1),
+            );
+          } else {
+            lines.push("rates: collecting baseline...");
+          }
+
+          if (snapshot.candidatePair) {
+            const local = snapshot.candidatePair.localCandidate || {};
+            const remote = snapshot.candidatePair.remoteCandidate || {};
+            lines.push(
+              "candidate_pair: state=" +
+                snapshot.candidatePair.state +
+                " rtt_ms=" +
+                fmtNumber(snapshot.candidatePair.currentRoundTripTimeMs, 1),
+            );
+            lines.push(
+              "path: local=" +
+                [local.address, local.port, local.type, local.protocol]
+                  .filter(Boolean)
+                  .join(":") +
+                " -> remote=" +
+                [remote.address, remote.port, remote.type, remote.protocol]
+                  .filter(Boolean)
+                  .join(":"),
+            );
+          } else {
+            lines.push("candidate_pair: n/a");
+          }
+
+          lines.push(
+            "warnings: " + (warnings.length ? warnings.join(", ") : "none"),
+          );
+          lines.push("");
+          lines.push("recent_events:");
+          if (state.logs.length === 0) {
+            lines.push("  (none)");
+          } else {
+            for (let i = 0; i < state.logs.length; i += 1) {
+              lines.push("  " + state.logs[i]);
+            }
+          }
+          lines.push("");
+          lines.push("raw_snapshot:");
+          lines.push(JSON.stringify(snapshot, null, 2));
+          return lines.join("\n");
+        };
+
+        const renderStatusOnly = (message) => {
+          state.latestReport = "Media Debug Probe\n" + message + "\n";
+          output.textContent = state.latestReport;
+          copyButton.disabled = state.latestReport.trim().length === 0;
+          window.dispatchEvent(
+            new CustomEvent("Company:media-quality", {
+              detail: {
+                snapshot: null,
+                delta: null,
+                warnings: [message],
+              },
+            }),
+          );
+        };
+
+        const sampleOnce = async () => {
+          const peerConnection = findPeerConnection();
+          if (!peerConnection) {
+            if (!state.noPeerConnectionLogged) {
+              pushLog("peer connection unavailable");
+              state.noPeerConnectionLogged = true;
+            }
+            if (state.lastSample) {
+              state.latestReport = renderReport(
+                state.lastSample,
+                null,
+                ["peer_connection_unavailable"],
+              );
+              output.textContent = state.latestReport;
+              copyButton.disabled = false;
+            } else {
+              renderStatusOnly("waiting_for_peer_connection=true");
+            }
+            return;
+          }
+          state.noPeerConnectionLogged = false;
+
+          try {
+            const stats = await peerConnection.getStats();
+            const snapshot = summariseStats(peerConnection, stats);
+            const delta = deriveDelta(snapshot, state.lastSample);
+            const warnings = buildWarnings(snapshot);
+            state.lastSample = snapshot;
+            pushLog(
+              "sample ok inbound_packets=" +
+                (snapshot.inbound ? snapshot.inbound.packetsReceived : "n/a") +
+                " outbound_packets=" +
+                (snapshot.outbound ? snapshot.outbound.packetsSent : "n/a"),
+            );
+            state.latestReport = renderReport(snapshot, delta, warnings);
+            output.textContent = state.latestReport;
+            copyButton.disabled = false;
+            window.dispatchEvent(
+              new CustomEvent("Company:media-quality", {
+                detail: {
+                  snapshot: snapshot,
+                  delta: delta,
+                  warnings: warnings,
+                },
+              }),
+            );
+          } catch (error) {
+            const message =
+              error && error.message
+                ? "sampling_error=" + error.message
+                : "sampling_error=unknown";
+            pushLog(message);
+            if (state.lastSample) {
+              state.latestReport = renderReport(
+                state.lastSample,
+                null,
+                ["sampling_error"],
+              );
+              output.textContent = state.latestReport;
+              copyButton.disabled = false;
+            } else {
+              renderStatusOnly(message);
+            }
+          }
+        };
+
+        const start = async () => {
+          if (state.running) {
+            return;
+          }
+          state.running = true;
+          state.logs = [];
+          state.lastSample = null;
+          state.noPeerConnectionLogged = false;
+          panel.classList.remove("hidden");
+          panel.open = true;
+          toggleButton.textContent = "Pause media debug";
+          pushLog("debug probe started");
+          await sampleOnce();
+          state.timer = setInterval(sampleOnce, POLL_INTERVAL_MS);
+        };
+
+        const stop = () => {
+          if (!state.running) {
+            return;
+          }
+          state.running = false;
+          if (state.timer) {
+            clearInterval(state.timer);
+            state.timer = null;
+          }
+          toggleButton.textContent = "Resume media debug";
+          pushLog("debug probe stopped");
+          state.latestReport = renderReport(
+            state.lastSample || {
+              sampledAt: stamp(),
+              connectionState: "unknown",
+              iceConnectionState: "unknown",
+              signalingState: "unknown",
+            },
+            null,
+            [],
+          );
+          output.textContent = state.latestReport;
+          copyButton.disabled = state.latestReport.trim().length === 0;
+        };
+
+        toggleButton.addEventListener("click", () => {
+          if (state.running) {
+            stop();
+          } else {
+            start();
+          }
+        });
+
+        copyButton.addEventListener("click", async () => {
+          const text = state.latestReport || output.textContent || "";
+          if (!text.trim()) {
+            return;
+          }
+          try {
+            await navigator.clipboard.writeText(text);
+            pushLog("report copied to clipboard");
+            state.latestReport = renderReport(
+              state.lastSample || {
+                sampledAt: stamp(),
+                connectionState: "unknown",
+                iceConnectionState: "unknown",
+                signalingState: "unknown",
+              },
+              null,
+              [],
+            );
+            output.textContent = state.latestReport;
+          } catch (error) {
+            pushLog("clipboard copy failed");
+          }
+        });
+
+        panel.classList.remove("hidden");
+        panel.open = false;
+        renderStatusOnly(
+          isMediaDebugEnabledByDefault()
+            ? "media debug starts automatically"
+            : "press Resume media debug to begin sampling",
+        );
+
+        if (setupDebugToggle) {
+          setupDebugToggle.addEventListener("change", () => {
+            if (setupDebugToggle.checked) {
+              start();
+            } else {
+              stop();
+            }
+          });
+        }
+
+        if (setupForm && setupDebugToggle) {
+          setupForm.addEventListener("submit", () => {
+            if (setupDebugToggle.checked) {
+              setTimeout(() => {
+                start();
+              }, 150);
+            }
+          });
+        }
+
+        if (
+          (setupDebugToggle && setupDebugToggle.checked) ||
+          (!setupDebugToggle && isMediaDebugEnabledByDefault())
+        ) {
+          setTimeout(() => {
+            start();
+          }, 150);
+        }
+
+        window.addEventListener("Company:call-ended", () => {
+          pushLog("call ended; freezing media debug report");
+          if (state.running) {
+            stop();
+          } else if (state.lastSample) {
+            state.latestReport = renderReport(state.lastSample, null, ["call_ended"]);
+            output.textContent = state.latestReport;
+            copyButton.disabled = false;
+          }
+        });
+
+        /*
+         * Public API for mobile app developers:
+         * window.MediaDebugProbe.start()
+         * window.MediaDebugProbe.stop()
+         * window.MediaDebugProbe.sampleOnce()
+         * window.MediaDebugProbe.getLatestReport()
+         */
+        window.MediaDebugProbe = {
+          start: start,
+          stop: stop,
+          sampleOnce: sampleOnce,
+          isRunning: function () {
+            return state.running;
+          },
+          getLatestReport: function () {
+            return state.latestReport;
+          },
+        };
+      })();
+    </script>
+  </body>
+</html>

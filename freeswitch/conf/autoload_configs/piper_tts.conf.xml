@@ -1,0 +1,16 @@
+<configuration name="piper_tts.conf" description="Piper TTS">
+    <settings>
+        <param name="cache-path" value="{{PIPER_CACHE_PATH}}"/>
+        <param name="cache-enable" value="{{PIPER_CACHE_ENABLE}}"/>
+
+        <param name="piper-bin" value="{{PIPER_BIN}}"/>
+        <param name="piper-opts" value="{{PIPER_OPTS}}"/>
+
+        <param name="voice-name-as-language" value="true"/>
+    </settings>
+
+    <models>
+        <model language="{{PIPER_LANGUAGE_EN}}" path="{{PIPER_VOICE_PATH_EN}}"/>
+        <model language="{{PIPER_LANGUAGE_FR}}" path="{{PIPER_VOICE_PATH_FR}}"/>
+    </models>
+</configuration>

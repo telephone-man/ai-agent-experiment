@@ -1,0 +1,26 @@
+id: cancellation_scope_correction
+description: User starts with account-level cancellation, then corrects scope to an add-on.
+input:
+  transcript: "I'd like to cancel my account actually just this add-on in my account"
+  is_partial: false
+  stt_confidence: 0.94
+  current_flow: "account_support"
+  last_agent_message: "How can I help with your account today?"
+  agent_is_speaking: false
+  tts_allow_interruptions: true
+  pending_action: null
+  pending_action_risk: "none"
+expected_semantic:
+  speech_act: "correction"
+  intent: "cancel_service"
+  correction_detected: true
+  slots:
+    cancellation_scope: "add-on"
+  discarded_slots:
+    cancellation_scope: "account"
+expected_policy:
+  decision: "CONFIRM_BEFORE_ACTION"
+  safe_to_execute_tools: false
+  requires_confirmation: true
+  blocked_actions:
+    - "cancel_service"

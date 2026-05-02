@@ -1,0 +1,26 @@
+id: self_correction_invoice_date
+description: User gives a payment date and then corrects it before finishing.
+input:
+  transcript: "Please pay invoice INV1042 on Monday no sorry Tuesday morning"
+  is_partial: false
+  stt_confidence: 0.94
+  current_flow: "billing"
+  last_agent_message: "When should I schedule the invoice payment?"
+  agent_is_speaking: false
+  tts_allow_interruptions: true
+  pending_action: "pay_invoice"
+  pending_action_risk: "high"
+expected_semantic:
+  speech_act: "correction"
+  intent: "pay_invoice"
+  correction_detected: true
+  slots:
+    payment_date: "Tuesday morning"
+  discarded_slots:
+    payment_date: "Monday"
+expected_policy:
+  decision: "CONFIRM_BEFORE_ACTION"
+  safe_to_execute_tools: false
+  requires_confirmation: true
+  forbidden_decisions:
+    - "END_CALL"

@@ -1,0 +1,23 @@
+id: repeated_hesitation_soft_checkin
+description: Repeated hesitation while the agent is speaking should trigger a soft check-in.
+input:
+  transcript: "ermmmm"
+  is_partial: false
+  stt_confidence: 0.9
+  current_flow: "assistant"
+  last_agent_message: "There are three options available..."
+  agent_is_speaking: true
+  tts_allow_interruptions: true
+  prior_soft_interjections_during_tts: 1
+  pending_action: null
+  pending_action_risk: "none"
+expected_policy:
+  decision: "SOFT_INTERRUPT_CHECKIN"
+  safe_to_execute_tools: false
+  flags:
+    - "soft_interjection"
+    - "repeated_backchannel"
+    - "hesitation_interjection"
+  forbidden_decisions:
+    - "SUPPRESS"
+    - "RESPOND"

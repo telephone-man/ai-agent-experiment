@@ -1,0 +1,23 @@
+<profile name="external">
+  <settings>
+    <param name="auth-calls" value="false"/>
+
+    <param name="debug" value="0"/>
+    <param name="dtmf-type" value="{{FREESWITCH_EXTERNAL_DTMF_TYPE}}"/>
+    <param name="liberal-dtmf" value="true"/>
+    <param name="rfc2833-pt" value="101"/>
+    <param name="dialplan" value="XML"/>
+    <param name="context" value="public"/>
+    <!-- Explicitly advertise RFC2833 telephone-event so upstream sends DTMF as RTP and not in-band -->
+    <param name="inbound-codec-prefs" value="$${global_codec_prefs},telephone-event"/>
+    <param name="outbound-codec-prefs" value="$${global_codec_prefs},telephone-event"/>
+
+    <param name="rtp-ip" value="$${local_ip_v4}"/> 
+    <param name="sip-ip" value="$${local_ip_v4}"/>
+    <param name="ext-rtp-ip" value="auto-nat"/>
+    <param name="ext-sip-ip" value="auto-nat"/>
+    <param name="sip-port" value="$${external_sip_port}"/>
+    <param name="rtp-timeout-sec" value="10"/>
+    <param name="rtp-hold-timeout-sec" value="120"/>
+  </settings>
+</profile>

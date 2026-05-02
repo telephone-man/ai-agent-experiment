@@ -1,0 +1,596 @@
+{
+  "id": "multilingual_replay",
+  "name": "Multilingual trace replay",
+  "description": "Offline showcase fixture for the browser trace replay. It demonstrates English weather tool orchestration, Spanish repair, barge-in handling, and audio quality telemetry without external API calls.",
+  "session_id": "mock-multilingual-replay",
+  "call_id": "mock-call-replay",
+  "languages": ["en", "es", "mixed"],
+  "demo_url": "/call/call.html?auto_start=1&voice_events_mock=1&voice_events_mock_trace=multilingual_replay&enable_media_debug=1",
+  "expected_capabilities": [
+    "partial_transcript",
+    "final_transcript",
+    "barge_in",
+    "tool_call_progress",
+    "language_metadata",
+    "latency_metrics",
+    "audio_quality_summary"
+  ],
+  "events": [
+    {
+      "seq": 1,
+      "at_ms": 0,
+      "source": "webrtc",
+      "type": "call.created",
+      "payload": {
+        "destination": "sip:7000@voice.local",
+        "mock": true
+      }
+    },
+    {
+      "seq": 2,
+      "at_ms": 350,
+      "source": "esl",
+      "type": "call.connected",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 3,
+      "at_ms": 650,
+      "source": "esl",
+      "type": "media.connected",
+      "payload": {
+        "transport": "mock",
+        "mock": true
+      }
+    },
+    {
+      "seq": 4,
+      "at_ms": 1100,
+      "source": "stt",
+      "type": "user.speech_started",
+      "payload": {
+        "inferred": true,
+        "language": "en",
+        "mock": true
+      }
+    },
+    {
+      "seq": 5,
+      "at_ms": 1450,
+      "source": "stt",
+      "type": "stt.partial",
+      "payload": {
+        "text": "what is",
+        "language": "en",
+        "is_final": false,
+        "mock": true
+      }
+    },
+    {
+      "seq": 6,
+      "at_ms": 1850,
+      "source": "stt",
+      "type": "stt.partial",
+      "payload": {
+        "text": "what is the weather in Lisbon",
+        "language": "en",
+        "is_final": false,
+        "mock": true
+      }
+    },
+    {
+      "seq": 7,
+      "at_ms": 2350,
+      "source": "stt",
+      "type": "stt.final",
+      "payload": {
+        "text": "What is the weather in Lisbon tomorrow?",
+        "language": "en",
+        "is_final": true,
+        "confidence": 0.96,
+        "mock": true
+      }
+    },
+    {
+      "seq": 8,
+      "at_ms": 2400,
+      "source": "stt",
+      "type": "user.speech_stopped",
+      "payload": {
+        "inferred": true,
+        "language": "en",
+        "mock": true
+      }
+    },
+    {
+      "seq": 9,
+      "at_ms": 2520,
+      "source": "policy",
+      "type": "policy.semantic_frame",
+      "payload": {
+        "speech_act": "question",
+        "intent": "weather_lookup",
+        "language": "en",
+        "mock": true
+      }
+    },
+    {
+      "seq": 10,
+      "at_ms": 2580,
+      "source": "policy",
+      "type": "policy.decision",
+      "payload": {
+        "action": "RESPOND",
+        "decision": "RESPOND",
+        "should_interrupt": false,
+        "mock": true
+      }
+    },
+    {
+      "seq": 11,
+      "at_ms": 2650,
+      "source": "system",
+      "type": "turn.started",
+      "payload": {
+        "turn_id": "mock-multilingual-replay:turn:1",
+        "text_words": 4,
+        "mock": true
+      }
+    },
+    {
+      "seq": 12,
+      "at_ms": 2750,
+      "source": "llm",
+      "type": "agent.thinking_started",
+      "payload": {
+        "text": "What is the weather in Lisbon tomorrow?",
+        "mock": true
+      }
+    },
+    {
+      "seq": 13,
+      "at_ms": 2890,
+      "source": "llm",
+      "type": "llm.request_started",
+      "payload": {
+        "history_size": 0,
+        "mock": true
+      }
+    },
+    {
+      "seq": 14,
+      "at_ms": 3000,
+      "source": "tool",
+      "type": "tool.call_started",
+      "payload": {
+        "tool_name": "mock_weather_lookup",
+        "location": "Lisbon",
+        "speech_text": "I'll check the mock weather feed for Lisbon.",
+        "mock": true
+      }
+    },
+    {
+      "seq": 15,
+      "at_ms": 3450,
+      "source": "tool",
+      "type": "tool.call_progress",
+      "payload": {
+        "tool_name": "mock_weather_lookup",
+        "location": "Lisbon",
+        "message": "Mock weather agent is composing a structured result.",
+        "mock": true
+      }
+    },
+    {
+      "seq": 16,
+      "at_ms": 3890,
+      "source": "tool",
+      "type": "tool.call_completed",
+      "payload": {
+        "tool_name": "mock_weather_lookup",
+        "location": "Lisbon",
+        "latency_ms": 890,
+        "result": {
+          "condition": "bright spells",
+          "temperature_c": 21,
+          "chance_of_rain": 15
+        },
+        "mock": true
+      }
+    },
+    {
+      "seq": 17,
+      "at_ms": 3910,
+      "source": "llm",
+      "type": "llm.request_finished",
+      "payload": {
+        "latency_ms": 1020,
+        "text_words": 13,
+        "mock": true
+      }
+    },
+    {
+      "seq": 18,
+      "at_ms": 3920,
+      "source": "llm",
+      "type": "llm.final_text",
+      "payload": {
+        "text": "The mock forecast for Lisbon is bright spells, 21 degrees, with a 15% chance of rain.",
+        "language": "en",
+        "mock": true
+      }
+    },
+    {
+      "seq": 19,
+      "at_ms": 3980,
+      "source": "llm",
+      "type": "agent.thinking_finished",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 20,
+      "at_ms": 4200,
+      "source": "tts",
+      "type": "tts.started",
+      "payload": {
+        "text": "The mock forecast for Lisbon is bright spells, 21 degrees, with a 15% chance of rain.",
+        "language": "en",
+        "mock": true
+      }
+    },
+    {
+      "seq": 21,
+      "at_ms": 4210,
+      "source": "tts",
+      "type": "tts.enqueue_started",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 22,
+      "at_ms": 4240,
+      "source": "tts",
+      "type": "tts.enqueued",
+      "payload": {
+        "enqueue_latency_ms": 30,
+        "tts_command_latency_ms": 18,
+        "estimated_playback_ms": 2200,
+        "mock": true
+      }
+    },
+    {
+      "seq": 23,
+      "at_ms": 4250,
+      "source": "tts",
+      "type": "agent.speaking_started",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 24,
+      "at_ms": 4260,
+      "source": "system",
+      "type": "turn.latency",
+      "payload": {
+        "llm_request_ms": 1020,
+        "tts_enqueue_ms": 30,
+        "tool_call_count": 1,
+        "tool_wait_ms": 890,
+        "tool_names": ["mock_weather_lookup"],
+        "estimated_playback_ms": 2200,
+        "final_to_tts_enqueued_ms": 1890,
+        "mock": true
+      }
+    },
+    {
+      "seq": 25,
+      "at_ms": 5050,
+      "source": "stt",
+      "type": "user.speech_started",
+      "payload": {
+        "inferred": true,
+        "language": "es",
+        "mock": true
+      }
+    },
+    {
+      "seq": 26,
+      "at_ms": 5350,
+      "source": "stt",
+      "type": "stt.partial",
+      "payload": {
+        "text": "perdona",
+        "language": "es",
+        "is_final": false,
+        "mock": true
+      }
+    },
+    {
+      "seq": 27,
+      "at_ms": 5440,
+      "source": "policy",
+      "type": "policy.decision",
+      "payload": {
+        "action": "CANCEL_TTS_AND_LISTEN",
+        "decision": "CANCEL_TTS_AND_LISTEN",
+        "should_interrupt": true,
+        "mock": true
+      }
+    },
+    {
+      "seq": 28,
+      "at_ms": 5480,
+      "source": "policy",
+      "type": "user.barge_in_detected",
+      "payload": {
+        "text": "perdona",
+        "language": "es",
+        "mock": true
+      }
+    },
+    {
+      "seq": 29,
+      "at_ms": 5520,
+      "source": "tts",
+      "type": "tts.cancel_requested",
+      "payload": {
+        "reason": "barge_in",
+        "mock": true
+      }
+    },
+    {
+      "seq": 30,
+      "at_ms": 5540,
+      "source": "tts",
+      "type": "tts.break_sent",
+      "payload": {
+        "reason": "barge_in",
+        "command_latency_ms": 20,
+        "mock": true
+      }
+    },
+    {
+      "seq": 31,
+      "at_ms": 5550,
+      "source": "tts",
+      "type": "tts.cancelled",
+      "payload": {
+        "reason": "barge_in",
+        "mock": true
+      }
+    },
+    {
+      "seq": 32,
+      "at_ms": 5600,
+      "source": "tts",
+      "type": "agent.speaking_stopped",
+      "payload": {
+        "reason": "barge_in",
+        "mock": true
+      }
+    },
+    {
+      "seq": 33,
+      "at_ms": 5980,
+      "source": "stt",
+      "type": "stt.final",
+      "payload": {
+        "text": "Perdona, puedes repetirlo mas despacio?",
+        "language": "es",
+        "is_final": true,
+        "confidence": 0.94,
+        "mock": true
+      }
+    },
+    {
+      "seq": 34,
+      "at_ms": 6040,
+      "source": "stt",
+      "type": "user.speech_stopped",
+      "payload": {
+        "inferred": true,
+        "language": "es",
+        "mock": true
+      }
+    },
+    {
+      "seq": 35,
+      "at_ms": 6150,
+      "source": "policy",
+      "type": "policy.semantic_frame",
+      "payload": {
+        "speech_act": "repair_request",
+        "intent": "repeat_slower",
+        "language": "es",
+        "mock": true
+      }
+    },
+    {
+      "seq": 36,
+      "at_ms": 6200,
+      "source": "policy",
+      "type": "policy.decision",
+      "payload": {
+        "action": "RESPOND",
+        "decision": "RESPOND",
+        "should_interrupt": false,
+        "mock": true
+      }
+    },
+    {
+      "seq": 37,
+      "at_ms": 6600,
+      "source": "system",
+      "type": "turn.started",
+      "payload": {
+        "turn_id": "mock-multilingual-replay:turn:2",
+        "text_words": 6,
+        "mock": true
+      }
+    },
+    {
+      "seq": 38,
+      "at_ms": 6800,
+      "source": "llm",
+      "type": "agent.thinking_started",
+      "payload": {
+        "text": "Perdona, puedes repetirlo mas despacio?",
+        "mock": true
+      }
+    },
+    {
+      "seq": 39,
+      "at_ms": 7000,
+      "source": "llm",
+      "type": "llm.request_started",
+      "payload": {
+        "history_size": 2,
+        "mock": true
+      }
+    },
+    {
+      "seq": 40,
+      "at_ms": 7890,
+      "source": "llm",
+      "type": "llm.request_finished",
+      "payload": {
+        "latency_ms": 890,
+        "text_words": 9,
+        "mock": true
+      }
+    },
+    {
+      "seq": 41,
+      "at_ms": 7900,
+      "source": "llm",
+      "type": "llm.final_text",
+      "payload": {
+        "text": "Claro. I will slow down and keep answers concise.",
+        "language": "mixed",
+        "mock": true
+      }
+    },
+    {
+      "seq": 42,
+      "at_ms": 7960,
+      "source": "llm",
+      "type": "agent.thinking_finished",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 43,
+      "at_ms": 8150,
+      "source": "tts",
+      "type": "tts.started",
+      "payload": {
+        "text": "Claro. I will slow down and keep answers concise.",
+        "language": "mixed",
+        "mock": true
+      }
+    },
+    {
+      "seq": 44,
+      "at_ms": 8160,
+      "source": "tts",
+      "type": "tts.enqueue_started",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 45,
+      "at_ms": 8190,
+      "source": "tts",
+      "type": "tts.enqueued",
+      "payload": {
+        "enqueue_latency_ms": 30,
+        "estimated_playback_ms": 1800,
+        "mock": true
+      }
+    },
+    {
+      "seq": 46,
+      "at_ms": 8200,
+      "source": "tts",
+      "type": "agent.speaking_started",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 47,
+      "at_ms": 8250,
+      "source": "system",
+      "type": "turn.latency",
+      "payload": {
+        "llm_request_ms": 890,
+        "tts_enqueue_ms": 30,
+        "estimated_playback_ms": 1800,
+        "final_to_tts_enqueued_ms": 2190,
+        "mock": true
+      }
+    },
+    {
+      "seq": 48,
+      "at_ms": 9300,
+      "source": "tts",
+      "type": "tts.finished",
+      "payload": {
+        "mock": true
+      }
+    },
+    {
+      "seq": 49,
+      "at_ms": 9350,
+      "source": "tts",
+      "type": "agent.speaking_stopped",
+      "payload": {
+        "mock": true
+      }
+    }
+  ],
+  "audio_quality_examples": [
+    {
+      "label": "good",
+      "snapshot": {
+        "connectionState": "connected",
+        "iceConnectionState": "connected",
+        "inbound": {
+          "packetsReceived": 420,
+          "packetsLost": 0,
+          "jitterMs": 4.2
+        },
+        "remoteInbound": {
+          "roundTripTimeMs": 38,
+          "fractionLost": 0
+        }
+      },
+      "expected_level": "good"
+    },
+    {
+      "label": "degraded",
+      "snapshot": {
+        "connectionState": "connected",
+        "iceConnectionState": "connected",
+        "inbound": {
+          "packetsReceived": 420,
+          "packetsLost": 18,
+          "jitterMs": 42
+        },
+        "remoteInbound": {
+          "roundTripTimeMs": 460,
+          "fractionLost": 0.04
+        }
+      },
+      "expected_level": "degraded"
+    }
+  ]
+}

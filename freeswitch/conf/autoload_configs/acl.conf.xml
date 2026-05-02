@@ -1,0 +1,21 @@
+<configuration name="acl.conf" description="Network Lists">
+  <network-lists>
+    <!--
+         These ACL's are automatically created on startup.
+
+         rfc1918.auto  - RFC1918 Space
+         nat.auto      - RFC1918 Excluding your local lan.
+         localnet.auto - ACL for your local lan.
+         loopback.auto - ACL for your local lan.
+    -->
+
+    <!-- This list allows media and signaling from the Docker subnet -->
+    <list name="docker" default="deny">
+      <node type="allow" cidr="{{VOIPNET_SUBNET}}"/>
+      <node type="allow" cidr="127.0.0.1/32"/>
+    </list>
+
+    <!-- Optionally, still include other system-level ACLs -->
+    <list name="domains" default="deny"/>
+  </network-lists>
+</configuration>

@@ -1,0 +1,26 @@
+id: clean_question
+description: User asks a normal invoice question.
+input:
+  transcript: "Can you tell me what invoice INV1042 is for?"
+  is_partial: false
+  stt_confidence: 0.96
+  current_flow: "account_support"
+  last_agent_message: "How can I help with your account today?"
+  agent_is_speaking: false
+  tts_allow_interruptions: true
+  pending_action: null
+  pending_action_risk: "none"
+expected_semantic:
+  addressed_to_agent: true
+  utterance_complete: true
+  speech_act: "question"
+  intent: "ask_invoice"
+  risky_action_mentioned: false
+  slots:
+    invoice_id: "INV1042"
+expected_policy:
+  decision: "RESPOND"
+  safe_to_execute_tools: false
+  forbidden_decisions:
+    - "END_CALL"
+    - "CONFIRM_BEFORE_ACTION"

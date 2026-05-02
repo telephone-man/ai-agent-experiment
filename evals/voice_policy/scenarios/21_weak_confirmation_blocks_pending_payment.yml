@@ -1,0 +1,23 @@
+id: weak_confirmation_blocks_pending_payment
+description: A weak yes is not enough to authorise a high-risk pending payment.
+input:
+  transcript: "yes"
+  is_partial: false
+  stt_confidence: 0.97
+  current_flow: "billing"
+  last_agent_message: "Should I pay invoice INV1042 now?"
+  agent_is_speaking: false
+  tts_allow_interruptions: true
+  pending_action: "pay_invoice"
+  pending_action_risk: "high"
+expected_semantic:
+  explicit_authorisation: false
+expected_policy:
+  decision: "CONFIRM_BEFORE_ACTION"
+  safe_to_execute_tools: false
+  requires_confirmation: true
+  blocked_actions:
+    - "pay_invoice"
+  forbidden_decisions:
+    - "RESPOND"
+    - "END_CALL"

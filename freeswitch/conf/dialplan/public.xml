@@ -1,0 +1,21 @@
+<include>
+  <context name="public">
+    <extension name="outbound-from-kamailio" continue="true">
+      <!-- Local AI assistant demo. FreeSWITCH anchors the call and the Python
+           gateway owns answering, media streaming, and TTS injection. -->
+      <condition field="destination_number" expression="^7000$" break="on-true">
+          <action application="log" data="INFO [dialplan] ai-assistant-7000 matched uuid=${uuid} caller=${caller_id_number}"/>
+          <action application="set" data="x_fs_host=${hostname}"/>
+          <action application="socket" data="voice_gateway:5050 async"/>
+      </condition>
+
+      <!-- Local two-party translation demo. The gateway originates and parks
+           the peer leg, then speaks translated audio to each side. -->
+      <condition field="destination_number" expression="^7100$" break="on-true">
+          <action application="log" data="INFO [dialplan] translate-7100 matched uuid=${uuid} caller=${caller_id_number}"/>
+          <action application="set" data="x_fs_host=${hostname}"/>
+          <action application="socket" data="voice_gateway:5050 async"/>
+      </condition>
+    </extension>
+  </context>
+</include>

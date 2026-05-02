@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "**/.env.example": "shellscript",
+    "**/conf/env": "shellscript",
+    "**/conf/env.example": "shellscript"
+  }
+}

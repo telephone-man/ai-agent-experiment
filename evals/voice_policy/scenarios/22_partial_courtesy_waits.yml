@@ -1,0 +1,25 @@
+id: partial_courtesy_waits
+description: Partial courtesy while the agent is speaking should not become a barge-in.
+input:
+  transcript: "thank you"
+  is_partial: true
+  stt_confidence: 0.93
+  current_flow: "account_support"
+  last_agent_message: "The invoice total is..."
+  agent_is_speaking: true
+  tts_allow_interruptions: true
+  pending_action: null
+  pending_action_risk: "none"
+expected_semantic:
+  addressed_to_agent: true
+  utterance_complete: false
+  flags:
+    - "partial"
+expected_policy:
+  decision: "WAIT"
+  safe_to_execute_tools: false
+  flags:
+    - "partial_wait"
+  forbidden_decisions:
+    - "CANCEL_TTS_AND_LISTEN"
+    - "RESPOND"

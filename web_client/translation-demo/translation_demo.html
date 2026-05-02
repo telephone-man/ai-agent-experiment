@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="translation_demo.css" />
+    <title>Translation demo</title>
+  </head>
+  <body>
+    <div class="demo-shell">
+      <header class="demo-toolbar">
+        <div class="demo-titlebar">
+          <button id="demo-back" class="back-button" type="button">Back</button>
+          <div>
+            <h1>Translation demo</h1>
+            <p id="demo-status" class="demo-status">Ready</p>
+          </div>
+        </div>
+        <div class="demo-controls">
+          <button
+            id="start-demo-en-fr"
+            type="button"
+            data-start-demo
+            data-source-language="en"
+            data-target-language="fr"
+          >
+            Start English to French
+          </button>
+          <button
+            id="start-demo-fr-en"
+            class="secondary"
+            type="button"
+            data-start-demo
+            data-source-language="fr"
+            data-target-language="en"
+          >
+            Start French to English
+          </button>
+          <button id="hangup-demo" class="secondary" type="button" disabled>
+            Hang up
+          </button>
+          <button id="reset-demo" class="secondary" type="button">Reset</button>
+        </div>
+      </header>
+
+      <main class="demo-grid">
+        <section class="client-pane" aria-label="Person A caller">
+          <div class="client-header">
+            <div>
+              <span class="client-kicker">Person A</span>
+              <h2>Caller</h2>
+            </div>
+            <strong id="caller-status" class="client-status">Loading</strong>
+          </div>
+          <iframe
+            id="caller-frame"
+            title="Person A caller"
+            allow="microphone; autoplay"
+          ></iframe>
+        </section>
+
+        <section class="pipeline-pane" aria-label="Translation pipeline">
+          <div class="pipeline-header">
+            <span class="client-kicker">Live path</span>
+            <h2 id="route-title">Choose a direction</h2>
+            <p id="demo-instruction" class="demo-instruction">
+              Choose a direction to prepare the call.
+            </p>
+          </div>
+
+          <div class="pipeline-steps" role="list">
+            <div class="pipeline-step" data-step="caller" role="listitem">
+              <span class="step-index">1</span>
+              <div>
+                <strong>Person A speech</strong>
+                <small id="step-caller-detail">Waiting</small>
+              </div>
+            </div>
+            <div class="pipeline-step" data-step="stt" role="listitem">
+              <span class="step-index">2</span>
+              <div>
+                <strong>STT ingest</strong>
+                <small id="step-stt-detail">Waiting</small>
+              </div>
+            </div>
+            <div class="pipeline-step" data-step="translation" role="listitem">
+              <span class="step-index">3</span>
+              <div>
+                <strong>Translation</strong>
+                <small id="step-translation-detail">Waiting</small>
+              </div>
+            </div>
+            <div class="pipeline-step" data-step="tts" role="listitem">
+              <span class="step-index">4</span>
+              <div>
+                <strong>TTS queue</strong>
+                <small id="step-tts-detail">Waiting</small>
+              </div>
+            </div>
+            <div class="pipeline-step" data-step="receiver" role="listitem">
+              <span class="step-index">5</span>
+              <div>
+                <strong>Person B audio</strong>
+                <small id="step-receiver-detail">Waiting</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-readout">
+            <div>
+              <span>Source</span>
+              <strong id="source-text">No transcript yet</strong>
+            </div>
+            <div>
+              <span>Translated</span>
+              <strong id="translated-text">No translated text yet</strong>
+            </div>
+            <div>
+              <span>Latency</span>
+              <strong id="translation-latency">n/a</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="client-pane" aria-label="Person B receiver">
+          <div class="client-header">
+            <div>
+              <span class="client-kicker">Person B</span>
+              <h2>Bob</h2>
+            </div>
+            <strong id="bob-status" class="client-status">Loading</strong>
+          </div>
+          <iframe
+            id="bob-frame"
+            title="Person B Bob"
+            allow="microphone; autoplay"
+          ></iframe>
+        </section>
+      </main>
+    </div>
+
+    <script src="translation_demo.js"></script>
+  </body>
+</html>

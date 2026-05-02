@@ -1,0 +1,26 @@
+id: partial_non_interruptible_suppressed
+description: Partial barge-in during non-interruptible critical speech must be suppressed.
+input:
+  transcript: "Actually I need to correct that"
+  is_partial: true
+  stt_confidence: 0.91
+  current_flow: "billing"
+  last_agent_message: "Please confirm this payment authorisation carefully."
+  agent_is_speaking: true
+  tts_allow_interruptions: false
+  pending_action: "pay_invoice"
+  pending_action_risk: "irreversible"
+expected_semantic:
+  addressed_to_agent: true
+  utterance_complete: false
+  flags:
+    - "partial"
+expected_policy:
+  decision: "SUPPRESS"
+  safe_to_execute_tools: false
+  flags:
+    - "partial_interrupt_suppressed"
+    - "non_interruptible_tts"
+  forbidden_decisions:
+    - "CANCEL_TTS_AND_LISTEN"
+    - "RESPOND"

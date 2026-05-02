@@ -1,0 +1,21 @@
+id: side_talk
+description: User appears to ask someone nearby for a postcode rather than addressing the agent.
+input:
+  transcript: "what's our postcode again"
+  is_partial: false
+  stt_confidence: 0.89
+  current_flow: "account_support"
+  last_agent_message: "I can update your address if you confirm the postcode."
+  agent_is_speaking: false
+  tts_allow_interruptions: true
+  pending_action: "update_details"
+  pending_action_risk: "medium"
+expected_semantic:
+  addressed_to_agent: false
+  speech_act: "side_talk"
+expected_policy:
+  decision: "WAIT"
+  safe_to_execute_tools: false
+  forbidden_decisions:
+    - "RESPOND"
+    - "END_CALL"

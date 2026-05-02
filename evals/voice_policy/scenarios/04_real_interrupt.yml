@@ -1,0 +1,20 @@
+id: real_interrupt
+description: Agent is speaking and user clearly interrupts.
+input:
+  transcript: "hang on that's wrong"
+  is_partial: false
+  stt_confidence: 0.96
+  current_flow: "account_support"
+  last_agent_message: "Your invoice was paid on..."
+  agent_is_speaking: true
+  tts_allow_interruptions: true
+  pending_action: null
+  pending_action_risk: "none"
+expected_semantic:
+  speech_act: "interruption"
+expected_policy:
+  decision: "CANCEL_TTS_AND_LISTEN"
+  safe_to_execute_tools: false
+  forbidden_decisions:
+    - "SUPPRESS"
+    - "RESPOND"

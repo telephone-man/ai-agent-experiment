@@ -1,0 +1,208 @@
+{
+  "cases": [
+    {
+      "id": "en_to_es_weather",
+      "transcript": "Can you tell me the weather in Lisbon?",
+      "source_language": "en",
+      "target_language": "es",
+      "expected": {
+        "route": "en->es",
+        "stt_language": "en",
+        "translation_request": {
+          "source_language": "en",
+          "target_language": "es",
+          "text": "Can you tell me the weather in Lisbon?"
+        },
+        "tts_language": "es",
+        "policy_outcome": "user_turn",
+        "translated_text": "[es] Can you tell me the weather in Lisbon?"
+      }
+    },
+    {
+      "id": "es_to_en_repair",
+      "transcript": "Puedes repetirlo mas despacio?",
+      "source_language": "es",
+      "target_language": "en",
+      "expected": {
+        "route": "es->en",
+        "stt_language": "es",
+        "translation_request": {
+          "source_language": "es",
+          "target_language": "en",
+          "text": "Puedes repetirlo mas despacio?"
+        },
+        "tts_language": "en",
+        "policy_outcome": "user_turn",
+        "translated_text": "[en] Puedes repetirlo mas despacio?"
+      }
+    },
+    {
+      "id": "fr_to_en_support",
+      "transcript": "Je voudrais changer la date de ma facture.",
+      "source_language": "fr",
+      "target_language": "en",
+      "expected": {
+        "route": "fr->en",
+        "stt_language": "fr",
+        "translation_request": {
+          "source_language": "fr",
+          "target_language": "en",
+          "text": "Je voudrais changer la date de ma facture."
+        },
+        "tts_language": "en",
+        "policy_outcome": "user_turn",
+        "translated_text": "[en] Je voudrais changer la date de ma facture."
+      }
+    },
+    {
+      "id": "en_to_fr_pause",
+      "transcript": "I need a moment to check the invoice number.",
+      "source_language": "en",
+      "target_language": "fr",
+      "expected": {
+        "route": "en->fr",
+        "stt_language": "en",
+        "translation_request": {
+          "source_language": "en",
+          "target_language": "fr",
+          "text": "I need a moment to check the invoice number."
+        },
+        "tts_language": "fr",
+        "policy_outcome": "user_turn",
+        "translated_text": "[fr] I need a moment to check the invoice number."
+      }
+    },
+    {
+      "id": "mixed_en_es_to_en",
+      "transcript": "Sorry, puedes decir that again?",
+      "source_language": "mixed-en-es",
+      "target_language": "en",
+      "expected": {
+        "route": "mixed-en-es->en",
+        "stt_language": "mixed-en-es",
+        "translation_request": {
+          "source_language": "mixed-en-es",
+          "target_language": "en",
+          "text": "Sorry, puedes decir that again?"
+        },
+        "tts_language": "en",
+        "policy_outcome": "user_turn",
+        "translated_text": "[en] Sorry, puedes decir that again?"
+      }
+    },
+    {
+      "id": "fr_backchannel_oui",
+      "transcript": "oui",
+      "source_language": "fr",
+      "target_language": "en",
+      "expected": {
+        "route": "fr->en",
+        "stt_language": "fr",
+        "tts_language": "en",
+        "policy_outcome": "backchannel",
+        "should_interrupt": false,
+        "translation_request": null,
+        "translated_text": null
+      }
+    },
+    {
+      "id": "es_backchannel_vale",
+      "transcript": "vale",
+      "source_language": "es",
+      "target_language": "en",
+      "expected": {
+        "route": "es->en",
+        "stt_language": "es",
+        "tts_language": "en",
+        "policy_outcome": "backchannel",
+        "should_interrupt": false,
+        "translation_request": null,
+        "translated_text": null
+      }
+    },
+    {
+      "id": "fr_goodbye_au_revoir",
+      "transcript": "au revoir",
+      "source_language": "fr",
+      "target_language": "en",
+      "expected": {
+        "route": "fr->en",
+        "stt_language": "fr",
+        "tts_language": "en",
+        "policy_outcome": "goodbye",
+        "should_interrupt": true,
+        "translation_request": null,
+        "translated_text": null
+      }
+    },
+    {
+      "id": "es_goodbye_adios",
+      "transcript": "adios",
+      "source_language": "es",
+      "target_language": "en",
+      "expected": {
+        "route": "es->en",
+        "stt_language": "es",
+        "tts_language": "en",
+        "policy_outcome": "goodbye",
+        "should_interrupt": true,
+        "translation_request": null,
+        "translated_text": null
+      }
+    },
+    {
+      "id": "low_confidence_noise_ignored",
+      "transcript": "unclear",
+      "source_language": "en",
+      "target_language": "es",
+      "confidence": 0.2,
+      "expected": {
+        "route": "en->es",
+        "stt_language": "en",
+        "tts_language": "es",
+        "policy_outcome": "ignore",
+        "should_interrupt": false,
+        "translation_request": null,
+        "translated_text": null
+      }
+    },
+    {
+      "id": "fr_partial_barge_in_interrupts_peer_audio",
+      "transcript": "Attends je dois corriger le rendez-vous",
+      "source_language": "fr",
+      "target_language": "en",
+      "is_final": false,
+      "agent_is_speaking": true,
+      "expected": {
+        "route": "fr->en",
+        "stt_language": "fr",
+        "tts_language": "en",
+        "is_final": false,
+        "agent_is_speaking": true,
+        "policy_outcome": "partial",
+        "should_interrupt": true,
+        "translation_request": null,
+        "translated_text": null
+      }
+    },
+    {
+      "id": "en_partial_without_peer_audio_waits",
+      "transcript": "I am still checking the invoice number",
+      "source_language": "en",
+      "target_language": "fr",
+      "is_final": false,
+      "agent_is_speaking": false,
+      "expected": {
+        "route": "en->fr",
+        "stt_language": "en",
+        "tts_language": "fr",
+        "is_final": false,
+        "agent_is_speaking": false,
+        "policy_outcome": "partial",
+        "should_interrupt": false,
+        "translation_request": null,
+        "translated_text": null
+      }
+    }
+  ]
+}

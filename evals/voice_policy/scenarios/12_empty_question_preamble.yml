@@ -1,0 +1,21 @@
+id: empty_question_preamble
+description: User starts a question preamble but has not provided the question body.
+input:
+  transcript: "Let me ask."
+  is_partial: false
+  stt_confidence: 1.0
+  current_flow: "assistant"
+  last_agent_message: "This is an AI voice assistant. Ask me a question after the tone."
+  agent_is_speaking: false
+  tts_allow_interruptions: true
+  pending_action: null
+  pending_action_risk: "none"
+expected_semantic:
+  addressed_to_agent: true
+  utterance_complete: false
+expected_policy:
+  decision: "WAIT"
+  safe_to_execute_tools: false
+  forbidden_decisions:
+    - "RESPOND"
+    - "END_CALL"

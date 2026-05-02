@@ -1,0 +1,226 @@
+services:
+  web_client:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./conf/web-client-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web_client:/usr/share/nginx/html:ro
+      - ./docs/replay-fixtures:/usr/share/nginx/replay-fixtures:ro
+    ports:
+      - "127.0.0.1:8080:80"
+    networks:
+      voipnet:
+        ipv4_address: ${WEB_CLIENT_LOCAL_IP:-192.168.144.12}
+
+  voice_gateway:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+    command: ["uvicorn", "services.voice_gateway.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    env_file:
+      - ./conf/env
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AI_OFFLINE_FALLBACK: ${AI_OFFLINE_FALLBACK:-0}
+      STT_FALLBACK_ON_UPSTREAM_ERROR: ${STT_FALLBACK_ON_UPSTREAM_ERROR:-0}
+      VOICE_GATEWAY_LOCAL_IP: ${VOICE_GATEWAY_LOCAL_IP:-192.168.144.2}
+      VOICE_GATEWAY_ESL_HOST: ${VOICE_GATEWAY_ESL_HOST:-}
+      VOICE_GATEWAY_ALLOW_WILDCARD_EVENTS: ${VOICE_GATEWAY_ALLOW_WILDCARD_EVENTS:-0}
+      VOICE_GATEWAY_DELIVERY_RESUME_DELAY_SECONDS: ${VOICE_GATEWAY_DELIVERY_RESUME_DELAY_SECONDS:-2.0}
+      FREESWITCH_ESL_PORT: ${FREESWITCH_ESL_PORT:-8021}
+      FREESWITCH_ESL_PASSWORD: ${FREESWITCH_ESL_PASSWORD:?run ./setup.sh to create local secrets}
+    depends_on:
+      stt_service:
+        condition: service_healthy
+      llm_service:
+        condition: service_healthy
+      tts_service:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    networks:
+      voipnet:
+        ipv4_address: ${VOICE_GATEWAY_LOCAL_IP:-192.168.144.2}
+        aliases:
+          - voice-gateway
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  stt_service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+    command: ["uvicorn", "services.stt_service.main:app", "--host", "0.0.0.0", "--port", "8001"]
+    env_file:
+      - ./conf/env
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AI_OFFLINE_FALLBACK: ${AI_OFFLINE_FALLBACK:-0}
+      STT_FALLBACK_ON_UPSTREAM_ERROR: ${STT_FALLBACK_ON_UPSTREAM_ERROR:-0}
+      LOCAL_STT_FINAL_TEXT: ${LOCAL_STT_FINAL_TEXT:-Speech detected by offline STT fallback; no transcript available.}
+      LOCAL_STT_CONFIDENCE: ${LOCAL_STT_CONFIDENCE:-0}
+    networks:
+      voipnet:
+        ipv4_address: ${STT_SERVICE_LOCAL_IP:-192.168.144.7}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8001/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  llm_service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+    command: ["uvicorn", "services.llm_service.main:app", "--host", "0.0.0.0", "--port", "8002"]
+    env_file:
+      - ./conf/env
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AI_OFFLINE_FALLBACK: ${AI_OFFLINE_FALLBACK:-0}
+      LLM_FALLBACK_ON_UPSTREAM_ERROR: ${LLM_FALLBACK_ON_UPSTREAM_ERROR:-0}
+      LLM_ENABLE_MOCK_WEATHER_TOOL: ${LLM_ENABLE_MOCK_WEATHER_TOOL:-0}
+      MOCK_WEATHER_TOOL_DELAY_MS: ${MOCK_WEATHER_TOOL_DELAY_MS:-900}
+    networks:
+      voipnet:
+        ipv4_address: ${LLM_SERVICE_LOCAL_IP:-192.168.144.8}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8002/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  tts_service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+    command: ["uvicorn", "services.tts_service.main:app", "--host", "0.0.0.0", "--port", "8003"]
+    env_file:
+      - ./conf/env
+    environment:
+      AI_OFFLINE_FALLBACK: ${AI_OFFLINE_FALLBACK:-0}
+      FREESWITCH_ESL_PORT: ${FREESWITCH_ESL_PORT:-8021}
+      FREESWITCH_ESL_PASSWORD: ${FREESWITCH_ESL_PASSWORD:?run ./setup.sh to create local secrets}
+    depends_on:
+      freeswitch:
+        condition: service_started
+    networks:
+      voipnet:
+        ipv4_address: ${TTS_SERVICE_LOCAL_IP:-192.168.144.9}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8003/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  kamailio_db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${KAMAILIO_DB_SUPERUSER:-kamailio}
+      POSTGRES_PASSWORD: ${KAMAILIO_DB_SUPERUSER_PASS:?run ./setup.sh to create local secrets}
+      POSTGRES_DB: postgres
+    volumes:
+      - kamailio_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KAMAILIO_DB_SUPERUSER:-kamailio}"]
+      interval: 5s
+      timeout: 10s
+      retries: 8
+    networks:
+      voipnet:
+        ipv4_address: ${KAMAILIO_DB_LOCAL_IP:-192.168.144.3}
+
+  kamailio:
+    build: ./kamailio
+    depends_on:
+      kamailio_db:
+        condition: service_healthy
+      rtpengine:
+        condition: service_healthy
+    environment:
+      CONFIG_FILE: /conf/env
+      RTPENGINE_SOCK: udp:rtpengine:2223
+      KAMAILIO_DB_HOSTNAME: ${KAMAILIO_DB_HOSTNAME:-kamailio_db}
+      KAMAILIO_DB_NAME: ${KAMAILIO_DB_NAME:-kamailio}
+      KAMAILIO_DB_SUPERUSER: ${KAMAILIO_DB_SUPERUSER:-kamailio}
+      KAMAILIO_DB_SUPERUSER_PASS: ${KAMAILIO_DB_SUPERUSER_PASS:?run ./setup.sh to create local secrets}
+      KAMAILIO_DB_RW_USER: ${KAMAILIO_DB_RW_USER:-kamailio_rw}
+      KAMAILIO_DB_RW_PASS: ${KAMAILIO_DB_RW_PASS:?run ./setup.sh to create local secrets}
+      KAMAILIO_DB_RO_USER: ${KAMAILIO_DB_RO_USER:-kamailio_ro}
+      KAMAILIO_DB_RO_PASS: ${KAMAILIO_DB_RO_PASS:?run ./setup.sh to create local secrets}
+      KAMAILIO_LISTEN_IP: ${KAMAILIO_LISTEN_IP:-0.0.0.0}
+      KAMAILIO_ADVERTISED_IP: ${KAMAILIO_ADVERTISED_IP:-127.0.0.1}
+      KAMAILIO_EXTERNAL_SIP_PORT: ${KAMAILIO_EXTERNAL_SIP_PORT:-5067}
+      KAMAILIO_EXTERNAL_ADVERTISED_PORT: ${KAMAILIO_EXTERNAL_ADVERTISED_PORT:-5060}
+      KAMAILIO_EXTERNAL_WEBRTC_PORT: ${KAMAILIO_EXTERNAL_WEBRTC_PORT:-5066}
+      KAMAILIO_INTERNAL_SIP_PORT: ${KAMAILIO_INTERNAL_SIP_PORT:-5060}
+      KAMAILIO_INTERNAL_WEBRTC_PORT: ${KAMAILIO_INTERNAL_WEBRTC_PORT:-5068}
+      KAMAILIO_DEBUG_LEVEL: ${KAMAILIO_DEBUG_LEVEL:-0}
+      KAMAILIO_SIP_BODY_LOGGING: ${KAMAILIO_SIP_BODY_LOGGING:-0}
+      KAMAILIO_SIPDUMP_ENABLE: ${KAMAILIO_SIPDUMP_ENABLE:-0}
+      KAMAILIO_SIPTRACE_ENABLE: ${KAMAILIO_SIPTRACE_ENABLE:-0}
+    volumes:
+      - ./conf/env:/conf/env:ro
+    ports:
+      - "127.0.0.1:5060:5067/udp"
+      - "127.0.0.1:5060:5067/tcp"
+      - "127.0.0.1:5066:5066/tcp"
+    networks:
+      voipnet:
+        ipv4_address: ${KAMAILIO_LOCAL_IP:-192.168.144.4}
+
+  rtpengine:
+    build: ./rtpengine
+    environment:
+      CONFIG_FILE: /conf/env
+      RTPENGINE_LOCAL_IP: ${RTPENGINE_LOCAL_IP:-192.168.144.5}
+      RTPENGINE_LISTEN_NG_IP: ${RTPENGINE_LOCAL_IP:-192.168.144.5}
+      RTPENGINE_INTERFACE_INTERNAL_BIND_IP: ${RTPENGINE_LOCAL_IP:-192.168.144.5}
+      RTPENGINE_INTERFACE_EXTERNAL_BIND_IP: ${RTPENGINE_LOCAL_IP:-192.168.144.5}
+      RTPENGINE_INTERFACE_EXTERNAL_ADVERTISE_IP: ${RTPENGINE_INTERFACE_EXTERNAL_ADVERTISE_IP:-127.0.0.1}
+      RTPENGINE_LISTEN_CLI_IP: ${RTPENGINE_LISTEN_CLI_IP:-127.0.0.1}
+      RTPENGINE_RTP_PORT_START: ${RTPENGINE_RTP_PORT_START:-30000}
+      RTPENGINE_RTP_PORT_END: ${RTPENGINE_RTP_PORT_END:-30200}
+      RTPENGINE_LOG_LEVEL: ${RTPENGINE_LOG_LEVEL:-6}
+      RTPENGINE_LOG_LEVEL_SUBSYSTEM: ${RTPENGINE_LOG_LEVEL_SUBSYSTEM:-core:6;control:6;crypto:6;srtp:6;rtcp:6;ice:6;internals:0}
+    volumes:
+      - ./conf/env:/conf/env:ro
+    ports:
+      - "127.0.0.1:30000-30200:30000-30200/udp"
+    networks:
+      voipnet:
+        ipv4_address: ${RTPENGINE_LOCAL_IP:-192.168.144.5}
+
+  freeswitch:
+    build: ./freeswitch
+    hostname: freeswitch
+    environment:
+      CONFIG_FILE: /conf/env
+      FREESWITCH_ESL_PORT: ${FREESWITCH_ESL_PORT:-8021}
+      FREESWITCH_ESL_PASSWORD: ${FREESWITCH_ESL_PASSWORD:?run ./setup.sh to create local secrets}
+      FREESWITCH_EXTERNAL_DTMF_TYPE: ${FREESWITCH_EXTERNAL_DTMF_TYPE:-rfc2833}
+      FREESWITCH_CONSOLE_LOGLEVEL: ${FREESWITCH_CONSOLE_LOGLEVEL:-notice}
+      FREESWITCH_CORE_LOGLEVEL: ${FREESWITCH_CORE_LOGLEVEL:-notice}
+    cap_add:
+      - SYS_NICE
+    ulimits:
+      rtprio: 99
+      memlock: -1
+    volumes:
+      - ./conf/env:/conf/env:ro
+    networks:
+      voipnet:
+        ipv4_address: ${FREESWITCH_LOCAL_IP:-192.168.144.6}
+
+networks:
+  voipnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${VOIPNET_SUBNET:-192.168.144.0/20}
+
+volumes:
+  kamailio_data:
