@@ -8,31 +8,19 @@ termination, or production secret management.
 ## Runtime Topology
 
 ```mermaid
-flowchart LR
-    browser["Browser SIP.js client"]
-    kamailio["Kamailio SIP/WebSocket edge"]
-    rtpengine["RTPengine media anchor"]
-    freeswitch["FreeSWITCH call anchor"]
-    gateway["voice_gateway"]
-    stt["stt_service"]
-    llm["llm_service"]
-    tts["tts_service"]
-    bus["VoiceEventBus"]
-    events["/events WebSocket"]
-    panel["Browser observability panel"]
-
-    browser -->|"WebSocket SIP"| kamailio
-    browser <-->|"WebRTC media"| rtpengine
-    kamailio -->|"SIP routing/dispatch"| freeswitch
-    rtpengine <-->|"anchored RTP/SRTP media"| freeswitch
-    freeswitch -->|"outbound ESL + uuid_audio_stream"| gateway
-    gateway -->|"streaming audio"| stt
-    gateway -->|"prompt + policy metadata"| llm
-    gateway -->|"speech requests"| tts
-    tts -->|"FreeSWITCH speak command"| freeswitch
-    gateway -->|"structured metadata events"| bus
-    bus --> events
-    events --> panel
+graph LR;
+    A["Browser SIP.js client"] --> B["Kamailio SIP/WebSocket edge"];
+    B --> C["FreeSWITCH call anchor"];
+    A --> D["RTPengine media anchor"];
+    D --> C;
+    C --> E["voice_gateway"];
+    E --> F["stt_service"];
+    E --> G["llm_service"];
+    E --> H["tts_service"];
+    H --> C;
+    E --> I["VoiceEventBus"];
+    I --> J["/events WebSocket"];
+    J --> K["Browser observability panel"];
 ```
 
 ```text

@@ -81,32 +81,22 @@ Use this README as the primary path before opening the larger docs.
 ## Runtime Flow
 
 ```mermaid
-flowchart LR
-    browser["Browser SIP.js clients"]
-    kamailio["Kamailio SIP/WebSocket edge"]
-    rtpengine["RTPengine media anchor"]
-    freeswitch["FreeSWITCH call anchor"]
-    gateway["voice_gateway"]
-    policy["voice_policy"]
-    stt["stt_service"]
-    llm["llm_service"]
-    weather["mock weather tool"]
-    tts["tts_service"]
-
-    browser -->|"WebSocket SIP"| kamailio
-    browser <-->|"WebRTC media"| rtpengine
-    kamailio -->|"SIP routing"| freeswitch
-    rtpengine <-->|"RTP/SRTP media"| freeswitch
-    freeswitch -->|"outbound ESL + media WebSocket"| gateway
-    gateway -->|"audio stream"| stt
-    stt -->|"partial/final transcripts"| gateway
-    gateway -->|"semantic input"| policy
-    policy -->|"local decision"| gateway
-    gateway -->|"prompt, policy, delivery context"| llm
-    llm -->|"tool intent"| weather
-    gateway -->|"speech request"| tts
-    tts -->|"FreeSWITCH speak command"| freeswitch
-    gateway -->|"structured events"| browser
+graph LR;
+    A["Browser SIP.js clients"] --> B["Kamailio SIP/WebSocket edge"];
+    B --> C["FreeSWITCH call anchor"];
+    A --> D["RTPengine media anchor"];
+    D --> C;
+    C --> E["voice_gateway"];
+    E --> F["stt_service"];
+    F --> E;
+    E --> G["voice_policy"];
+    G --> E;
+    E --> H["llm_service"];
+    H --> I["mock weather tool"];
+    H --> E;
+    E --> J["tts_service"];
+    J --> C;
+    E --> A;
 ```
 
 Audio and call-control messages travel through the telecom components. A
